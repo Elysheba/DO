@@ -38,6 +38,6 @@ DO_sourceFiles <- data.frame(url = urls,
 toSave <- grep("^DO[_]", ls(), value = T)
 ddir <- "../data"
 
-write.table(toSave, file=file.path(ddir, paste(toSave, ".txt", sep="")))
+write.table(get(toSave), row.names = FALSE, sep = "\t", quote = FALSE, file=file.path(ddir, paste(toSave, ".txt", sep="")))
 
 

@@ -82,8 +82,9 @@ crossId$DB1 <- gsub(":.*","",crossId$id1)
 
 ######################################
 ## entryId
-entryId <- crossId[!duplicated(crossId$id1),c("DB1","id1")]
-names(entryId) <- c("DB","id")
+entryId <- nodesJson["id"]
+entryId$DB <- gsub(":.*","",entryId$id)
+entryId <- entryId[,c("DB","id")]
 entryId$definition <- nodesJson$def[match(entryId$id,nodesJson$id)]
 
 ######################################
@@ -106,6 +107,8 @@ parentId <- edgesJson[,c("sub","obj")]
 names(parentId) <- c("id","parent")
 parentId$DB <- gsub(":.*","",parentId$id)
 parentId$pDB <- gsub(":.*","",parentId$parent)
+parentId <- parentId[parentId$id %in% nodesJson$id,]
+parentId <- parentId[parentId$parent %in% nodesJson$id,]
 
 #######################################
 crossId$id1 <- gsub(".*:","",crossId$id1)
@@ -116,10 +119,10 @@ parentId$parent <- gsub(".*:","",parentId$parent)
 idNames$id <- gsub(".*:","",idNames$id)
 
 ############################
-DO_idNames <- idNames[,c("DB","id","name")]
+DO_idNames <- idNames[,c("DB","id","name","canonical")]
 DO_parentId <- parentId[,c("DB","id","pDB","parent")]
 DO_crossId <- crossId[,c("DB1","id1","DB2","id2")]
-DO_entryid <- entryId[,c("DB","id")]
+DO_entryId <- entryId[,c("DB","id","definition")]
 
 ############################
 toSave <- grep("^DO[_]", ls(), value=T)

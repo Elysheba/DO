@@ -9,7 +9,7 @@
 			"name":"doid.owl",
 			"URL template":"https://github.com/DiseaseOntology/HumanDiseaseOntology",
 			"remote update frequency": {
-				"value": ,
+				"value": 0,
 				"units": "1/day"
 			}
 		}
