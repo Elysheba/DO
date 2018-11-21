@@ -3,9 +3,11 @@ setwd("~/Shared/Data-Science/Data-Source-Model-Repository/DO/scripts/")
 library(git2r)
 library(RJSONIO)
 
+# reads json file "Description"
 desc <- readJSONStream("../DESCRIPTION.json")
 
-sourceFiles <- desc$"source files"
+# extracts source file name (.owl) and url from Json Description file
+sourceFiles <- desc$"source files" 
 urls <- unlist(lapply(
   sourceFiles,
   function(sf){
@@ -14,30 +16,30 @@ urls <- unlist(lapply(
     return(toRet)
   }
 ))
-srcDir <- "../sources/DO"
-gitRepo <- urls[1]
 
-## Clone or pull git repository
-if(!dir.exists(srcDir)){
+## Clone or pull git repository 
+srcDir <- "../sources/DO" # source directory 
+gitRepo <- urls[1] # not useful for updates, only for first pull
+if(!dir.exists(srcDir)){ # first pull
   gitRepo <- git2r::clone(url = gitRepo, local_path = srcDir)
-}else{
-  gitRepo <- git2r::repository(srcDir)
-  git2r::pull(gitRepo)
+}else{ # updates
+  gitRepo <- git2r::repository(srcDir) # opens source directory
+  git2r::pull(gitRepo) # pulls new data --> new data are in source directory as well
 }
 
+# Check if some files in sources>DO>src>ontology have been updated
+
 ###############################################
-## Information source files
+## Extract from new pull the time and date --> saves on a new D0_sourceFiles, with url from json Description file
 rcurrent <- git2r::odb_blobs(gitRepo)
 rcurrent <- tail(rcurrent[rcurrent$name == "doid.json",], n = 1L)
-
 DO_sourceFiles <- data.frame(url = urls,
                              current = rcurrent$when)
 
 ###############################################
-## Writing files
-toSave <- grep("^DO[_]", ls(), value = T)
-ddir <- "../data"
-
+## Saves new D0_sourceFiles.txt (only contains url and time/date of pull) in Data
+toSave <- grep("^DO[_]", ls(), value = T) # selects D0_sourceFiles
+ddir <- "../data" # defines where to save new data
 write.table(get(toSave), row.names = FALSE, sep = "\t", quote = FALSE, file=file.path(ddir, paste(toSave, ".txt", sep="")))
 
 
