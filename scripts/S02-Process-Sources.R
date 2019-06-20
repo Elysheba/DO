@@ -9,6 +9,9 @@ library(git2r)
 library(RJSONIO)
 source("../../00-Utils/writeLastUpdate.R")
 library(here)
+library(dplyr)
+library(tibble)
+library(tidyr)
 
 ##
 mc.cores <- 55
@@ -129,6 +132,13 @@ crossId <- xref[xref$id %in% disease$descendants,]
 #dim(crossId)
 names(crossId) <- c("dbid1","dbid2")
 
+## Remove spaces
+head(grep(": ",crossId$dbid2,value = T))
+head(grep(": ",crossId$dbid1,value = T))
+crossId$dbid1 <- gsub(" ","", crossId$dbid1)
+crossId$dbid2 <- gsub(" ","", crossId$dbid2)
+dim(crossId)
+
 # check no issue in names
 grep("#",crossId$dbid1,value = T)
 grep("#",crossId$dbid2,value = T)
@@ -142,17 +152,12 @@ crossId$id2 <- gsub(".*:","",crossId$dbid2)
 crossId$id1 <- gsub(".*:","",crossId$dbid1)
 dim(crossId)
 
-## remove ids with spaces
 ## Remove crossIds without a colon (e.g. definitions, ...)
 head(grep(":",crossId$dbid1,invert = T,value = T))
 head(grep(":",crossId$dbid2,invert = T,value = T))
 crossId <- crossId[grepl(":",crossId$dbid2) & grepl(":",crossId$dbid1) ,]
 dim(crossId)
-## Remove crossids with colon and space ": "
-head(grep(": ",crossId$dbid2,value = T))
-head(grep(": ",crossId$dbid1,value = T))
-crossId <- crossId[grep(": ",crossId$dbid2,invert = T),]
-dim(crossId)
+
 
 ## an integer is a correct disease ID > separate those that are (ToKeep) from those that aren't (ToCheck) - warnings are normal
 table(!is.na(as.numeric(crossId$id2)))
@@ -197,14 +202,20 @@ dim(crossId)
 head(crossId)
 
 # Replace some DB names by usual ones
+crossId$id1 <- gsub(" ", "", crossId$id1)
+crossId$id2 <- gsub(" ", "", crossId$id2)
 crossId$id2 <- gsub("MESH","MeSH",crossId$id2)
 crossId$id2 <- gsub("\\bNCI\\b","NCIt",crossId$id2)
 crossId$id2 <- gsub("ORDO","ORPHA",crossId$id2)
 crossId$id2 <- gsub("MEDDRA","MedDRA",crossId$id2)
 crossId$id2 <- gsub("UMLS_CUI","UMLS",crossId$id2)
-# crossId$id2 <- gsub("UMLS","MedGen",crossId$id2)
+crossId$id2 <- gsub("SNOMECT","SNOMEDCT",crossId$id2)
+crossId$id2 <- gsub("SNOMED_CT_US_2018_03_01","SNOMEDCT_US_2018_03_01",crossId$id2)
+
+crossId$id2 <- gsub("ICD-10","ICD10",crossId$id2)
 crossId$DB2 <- gsub(":.*","",crossId$id2)
 crossId$DB1 <- gsub(":.*","",crossId$id1)
+table(crossId$DB2)
 
 ## Remove self references
 crossId[which(crossId$id1 == crossId$id2),]
@@ -246,6 +257,7 @@ table(crossId$id1 %in% entryId$id)
 
 # select diseases only
 idNames <- syn[syn$id %in% disease$descendants,]
+idNames$canonical <- FALSE
 # check all ids contain ":"
 table(gsub(":.*","",idNames$id))
 # check for id with "#" in them
@@ -253,19 +265,18 @@ unique(grep("#",idNames$id, value =T))
 
 ## Look for labels in id table, check all have ":" and none have "#"
 lbl <- id[id$id %in% disease$descendants,c("id","label")]
+lbl$canonical <- TRUE
 table(gsub(":.*","",lbl$id))
 head(lbl)
 unique(grep("#",lbl$id, value =T))
 # lbl <- lbl[grep("#",lbl$id,invert = T, value = F),]
 
-## assemble two tables to have a big table with id and label/synonyms
-idNames <- rbind(idNames,setNames(lbl, nm = names(idNames)))
-# Add column DB
-idNames$DB <- gsub(":.*","",idNames$id)
-# Add column canonical, which is true only if the item in the 2nd column is a label
-idNames$canonical <- ifelse(idNames$syn %in% lbl$label, TRUE, FALSE)
-## Remove duplicated entries but keep all labels 
-dim(idNames)
+## 
+idNames <- idNames %>%
+  as_tibble() %>%
+  bind_rows(lbl %>% select(id, syn = label, canonical)) %>%
+  mutate(DB = gsub(":.*","", id))
+## unique
 dim(unique(idNames))
 idNames <- idNames[order(idNames$canonical,decreasing = T),]
 idNames <- unique(idNames)
@@ -282,7 +293,9 @@ table(unlist(sapply(idNames$syn, strsplit, split = "")))
 # Remove NA and duplicates
 table(is.na(idNames$syn))
 idNames <- idNames[!is.na(idNames$syn),]
+head(idNames)
 idNames <- unique(idNames)
+head(idNames)
 ## check all idNames are in entryId
 table(idNames$id %in% entryId$id)
 
@@ -292,7 +305,7 @@ table(nc)
 idNames[which(nc < 3),]
 idNames[which(nc == 3),]
 idNames[which(nc == 1),]
-idNames <- idNames[-which(nc == 0),]
+# idNames <- idNames[-which(nc == 0),]
 
 ######################################
 ## parentId

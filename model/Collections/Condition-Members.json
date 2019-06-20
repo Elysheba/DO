@@ -1,0 +1,19 @@
+{
+	"collection":"Condition",
+	"resource":"DO",
+	"tables":[
+		{
+			"name":"DO_entryId",
+			"fields":{
+				"source": {
+					"static":true,
+					"value":"DB"
+				},
+				"identifier": {
+					"static":false,
+					"value":"id"
+				}
+			}
+		}
+	]
+}
