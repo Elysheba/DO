@@ -15,7 +15,7 @@ library(tidyr)
 
 ##
 mc.cores <- 55
-sdir <- "../sources/DO/src/ontology/"
+sdir <- "../sources/HumanDiseaseOntology/src/ontology/"
 ddir <- "../data"
 
 ###############################################################################@
@@ -37,10 +37,10 @@ sfi_name <- unlist(lapply(
 ###############################################################################@
 ## Convert OWL to JSON
 # uses a program that is not in RStudio but should be run on the shell --> adds in the "shell" path where the program is
-Sys.setenv(PATH = paste(Sys.getenv("PATH"),"~/Shared/Data-Science/Data-Source-Model-Repository/00-Utils/bin/",sep = ":"))
-# Then runs the program to convert the owl source file into a json
-system(paste("robot convert --input ",file.path(sdir,"doid.owl"),
-             " --output ",file.path(sdir,"doid.json"), sep = ""))
+# Sys.setenv(PATH = paste(Sys.getenv("PATH"),"~/Shared/Data-Science/Data-Source-Model-Repository/00-Utils/bin/",sep = ":"))
+# # Then runs the program to convert the owl source file into a json
+# system(paste("robot convert --input ",file.path(sdir,"doid.owl"),
+#              " --output ",file.path(sdir,"doid.json"), sep = ""))
 # then reads the json filr
 readJson <- jsonlite::fromJSON(txt = file.path(sdir,"doid.json"))
 
@@ -224,7 +224,8 @@ crossId[which(crossId$id1 == crossId$id2),]
 ######################################
 ## entryId
 # Only select diseases
-entryId <- id[id$id %in% disease$descendants,]
+entryId <- id[id$id %in% disease$descendants,] %>% as_tibble()
+
 # Check all IDs have ":" in them, otherwise remove them
 table(gsub(":.*","",entryId$id))
 entryId <- entryId[grep(":",entryId$id),,drop = FALSE]
@@ -256,7 +257,8 @@ table(crossId$id1 %in% entryId$id)
 ## idNames
 
 # select diseases only
-idNames <- syn[syn$id %in% disease$descendants,]
+idNames <- syn[syn$id %in% disease$descendants,] %>%
+  as_tibble()
 idNames$canonical <- FALSE
 # check all ids contain ":"
 table(gsub(":.*","",idNames$id))
@@ -264,7 +266,8 @@ table(gsub(":.*","",idNames$id))
 unique(grep("#",idNames$id, value =T))
 
 ## Look for labels in id table, check all have ":" and none have "#"
-lbl <- id[id$id %in% disease$descendants,c("id","label")]
+lbl <- id[id$id %in% disease$descendants,c("id","label")] %>% 
+  as_tibble()
 lbl$canonical <- TRUE
 table(gsub(":.*","",lbl$id))
 head(lbl)
@@ -307,6 +310,11 @@ idNames[which(nc == 3),]
 idNames[which(nc == 1),]
 # idNames <- idNames[-which(nc == 0),]
 
+## Not every ID has a definition available, in this case, the canonical label will be used
+entryId <- entryId %>% 
+  mutate(def = case_when(is.na(def) ~ lbl$label[match(id,lbl$id)],
+                         TRUE ~ def))
+
 ######################################
 ## parentId
 
@@ -317,6 +325,7 @@ table(gsub(":.*","",parentId$obj))
 names(parentId) <- c("id","parent")
 parentId$DB <- gsub(":.*","",parentId$id)
 parentId$pDB <- gsub(":.*","",parentId$parent)
+parentId$origin <- "DO"
 
 ## check all parentId are in entryId
 table(parentId$id %in% entryId$id)
@@ -373,7 +382,7 @@ idNames$id <- gsub(".*:","",idNames$id)
 ############################
 # Put order into columns in all tables
 DO_idNames <- idNames[,c("DB","id","syn","canonical")]
-DO_parentId <- parentId[,c("DB","id","pDB","parent")]
+DO_parentId <- parentId[,c("DB","id","pDB","parent","origin")]
 DO_crossId <- crossId[,c("DB1","id1","DB2","id2")]
 DO_entryId <- entryId[,c("DB","id","def","level")]
 
@@ -400,4 +409,4 @@ writeLastUpdate()
 
 ##############################################################
 ## Check model
-source("../../00-Utils/autoCheckModel.R")
+## source("../../00-Utils/autoCheckModel.R")

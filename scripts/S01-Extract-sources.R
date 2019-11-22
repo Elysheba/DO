@@ -18,7 +18,7 @@ urls <- unlist(lapply(
 ))
 
 ## Clone or pull git repository 
-srcDir <- "../sources/DO" # source directory 
+srcDir <- "../sources/HumanDiseaseOntology" # source directory 
 gitRepo <- urls[1] # not useful for updates, only for first pull
 if(!dir.exists(srcDir)){ # first pull
   gitRepo <- git2r::clone(url = gitRepo, local_path = srcDir)
