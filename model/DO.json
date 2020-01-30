@@ -1,0 +1,363 @@
+{
+  "DO_entryId": {
+    "tableName": ["DO_entryId"],
+    "fields": [
+      {
+        "name": "DB",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Name original database/ontology"
+      },
+      {
+        "name": "id",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Disease ontology identifier from Disease Ontology"
+      },
+      {
+        "name": "def",
+        "type": "character",
+        "nullable": true,
+        "unique": false,
+        "comment": ""
+      },
+      {
+        "name": "level",
+        "type": "integer",
+        "nullable": false,
+        "unique": false,
+        "comment": ""
+      }
+    ],
+    "primaryKey": ["DB", "id"],
+    "foreignKeys": {},
+    "indexes": [
+      {
+        "fields": ["DB", "id"],
+        "unique": [true]
+      }
+    ],
+    "display": {
+      "x": [-38],
+      "y": [-51],
+      "color": ["NA"],
+      "comment": ["DO identifiers with definition and level information"]
+    }
+  },
+  "DO_crossId": {
+    "tableName": ["DO_crossId"],
+    "fields": [
+      {
+        "name": "DB1",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Name database for id1"
+      },
+      {
+        "name": "id1",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "disease ontology identifier"
+      },
+      {
+        "name": "DB2",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Name database id2"
+      },
+      {
+        "name": "id2",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Crossreference disease ontology id to id1"
+      }
+    ],
+    "primaryKey": ["DB1", "id1"],
+    "foreignKeys": [
+      {
+        "refTable": ["DO_entryId"],
+        "key": [
+          {
+            "from": "DB1",
+            "to": "DB"
+          },
+          {
+            "from": "id1",
+            "to": "id"
+          }
+        ],
+        "cardinality": [0, -1, 1, 1]
+      }
+    ],
+    "indexes": [
+      {
+        "fields": ["DB1", "id1"],
+        "unique": [true]
+      }
+    ],
+    "display": {
+      "x": [-214],
+      "y": [114],
+      "color": ["NA"],
+      "comment": ["Cross-reference information"]
+    }
+  },
+  "DO_parentId": {
+    "tableName": ["DO_parentId"],
+    "fields": [
+      {
+        "name": "DB",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Database for id"
+      },
+      {
+        "name": "id",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Disease ontology identifier from Disease Ontology "
+      },
+      {
+        "name": "pDB",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Name database for parent id"
+      },
+      {
+        "name": "parent",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Parent ontology for id in Monarch Disease Ontology "
+      },
+      {
+        "name": "origin",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": ""
+      }
+    ],
+    "primaryKey": ["DB", "id"],
+    "foreignKeys": [
+      {
+        "refTable": ["DO_entryId"],
+        "key": [
+          {
+            "from": "DB",
+            "to": "DB"
+          },
+          {
+            "from": "id",
+            "to": "id"
+          }
+        ],
+        "cardinality": [0, -1, 1, 1]
+      },
+      {
+        "refTable": ["DO_entryId"],
+        "key": [
+          {
+            "from": "pDB",
+            "to": "DB"
+          },
+          {
+            "from": "parent",
+            "to": "id"
+          }
+        ],
+        "cardinality": [0, -1, 1, 1]
+      }
+    ],
+    "indexes": [
+      {
+        "fields": ["parent", "pDB"],
+        "unique": [false]
+      },
+      {
+        "fields": ["DB", "id"],
+        "unique": [true]
+      }
+    ],
+    "display": {
+      "x": [-225],
+      "y": [-225],
+      "color": ["NA"],
+      "comment": ["NA"]
+    }
+  },
+  "DO_idNames": {
+    "tableName": ["DO_idNames"],
+    "fields": [
+      {
+        "name": "DB",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Name original database"
+      },
+      {
+        "name": "id",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Disease ontology identifier from Disease Ontology"
+      },
+      {
+        "name": "syn",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Term (synonym or label) to describe the disease"
+      },
+      {
+        "name": "canonical",
+        "type": "logical",
+        "nullable": false,
+        "unique": false,
+        "comment": "Current label for the entry"
+      }
+    ],
+    "primaryKey": ["DB", "id"],
+    "foreignKeys": [
+      {
+        "refTable": ["DO_entryId"],
+        "key": [
+          {
+            "from": "DB",
+            "to": "DB"
+          },
+          {
+            "from": "id",
+            "to": "id"
+          }
+        ],
+        "cardinality": [0, -1, 1, 1]
+      }
+    ],
+    "indexes": [
+      {
+        "fields": ["DB", "id"],
+        "unique": [true]
+      }
+    ],
+    "display": {
+      "x": [143],
+      "y": [-181],
+      "color": ["NA"],
+      "comment": ["Synonym and label information"]
+    }
+  },
+  "DO_sourceFiles": {
+    "tableName": ["DO_sourceFiles"],
+    "fields": [
+      {
+        "name": "url",
+        "type": "character",
+        "nullable": false,
+        "unique": true,
+        "comment": "URL location of source files"
+      },
+      {
+        "name": "current",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Date of the current version of the source files"
+      }
+    ],
+    "primaryKey": ["url"],
+    "foreignKeys": {},
+    "indexes": [
+      {
+        "fields": ["url"],
+        "unique": [true]
+      }
+    ],
+    "display": {
+      "x": [225],
+      "y": [225],
+      "color": ["NA"],
+      "comment": ["Version info"]
+    }
+  },
+  "DO_altId": {
+    "tableName": ["DO_altId"],
+    "fields": [
+      {
+        "name": "DB",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Database"
+      },
+      {
+        "name": "id",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Disease identifier"
+      },
+      {
+        "name": "aDB",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "alternative database"
+      },
+      {
+        "name": "altid",
+        "type": "character",
+        "nullable": false,
+        "unique": false,
+        "comment": "Alternative DO identifier"
+      }
+    ],
+    "foreignKeys": [
+      {
+        "refTable": ["DO_entryId"],
+        "key": [
+          {
+            "from": "DB",
+            "to": "DB"
+          },
+          {
+            "from": "id",
+            "to": "id"
+          }
+        ],
+        "cardinality": [0, -1, 1, 1]
+      },
+      {
+        "refTable": ["DO_entryId"],
+        "key": [
+          {
+            "from": "aDB",
+            "to": "DB"
+          },
+          {
+            "from": "altid",
+            "to": "id"
+          }
+        ],
+        "cardinality": [0, -1, 1, 1]
+      }
+    ],
+    "indexes": {},
+    "display": {
+      "x": [231],
+      "y": [23],
+      "color": ["NA"],
+      "comment": ["NA"]
+    }
+  }
+}

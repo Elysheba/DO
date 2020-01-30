@@ -12,7 +12,7 @@ library(here)
 library(dplyr)
 library(tibble)
 library(tidyr)
-
+library(ReDaMoR)
 ##
 mc.cores <- 55
 sdir <- "../sources/HumanDiseaseOntology/src/ontology/"
@@ -33,6 +33,12 @@ sfi_name <- unlist(lapply(
 ))
 
 ###############################################################################@
+## Data model
+###############################################################################@
+# dm <- model_relational_data(dm)
+# save(dm, file = here("model", "DO.rda"))
+
+###############################################################################@
 ## Data from doid.json ----
 ###############################################################################@
 ## Convert OWL to JSON
@@ -49,6 +55,7 @@ readJson <- jsonlite::fromJSON(txt = file.path(sdir,"doid.json"))
 ## from json file, extract nodes (= diseases), with the following: id, def (longer definition), label (name), xref (cross-references in other DBs), syn (synonyms)
 nodesJson <- lapply(1:nrow(readJson$graphs$nodes[[1]]),
                     function(i){
+                      # print(i)
                       ## id
                       id <- gsub("_",":",gsub(".*/","",readJson$graphs$nodes[[1]]$id[[i]]))
                       ## def
@@ -59,29 +66,42 @@ nodesJson <- lapply(1:nrow(readJson$graphs$nodes[[1]]),
                       name <- readJson$graphs$nodes[[1]]$meta$synonyms[[i]]$val
                       ## lbl
                       lbl <- readJson$graphs$nodes[[1]]$lbl[[i]]
+                      ## alt id
+                      if(!is.null(readJson$graphs$nodes[[1]]$meta$basicPropertyValues[[i]])){
+                        alt <- readJson$graphs$nodes[[1]]$meta$basicPropertyValues[[i]] %>%
+                          filter(grepl("hasAlternativeId", pred)) %>%
+                          pull(val)
+                      }else{
+                        alt <- NULL
+                      }
                       ## df
-                      df1 <- data.frame(
+                      df1 <- tibble(
                         id = id,
                         def = def,
-                        label = lbl,
-                        stringsAsFactors = FALSE)
+                        label = lbl)
                       if(length(Xref) == 0){
                         df2 <- NULL
                       }else{
-                        df2 <- data.frame(
+                        df2 <- tibble(
                           id = id,
-                          xref = Xref,
-                          stringsAsFactors = FALSE)
+                          xref = Xref)
                       }
                       if(length(name) == 0){
                         df3 <- NULL
                       }else{
-                        df3 <- data.frame(
+                        df3 <- tibble(
                           id = id,
-                          syn = name,
-                          stringsAsFactors = FALSE)
+                          syn = name)
                       }
-                      return(list(id = df1, xref = df2, syn = df3))
+                      if(length(alt) == 0){
+                        df4 <- NULL
+                      }else{
+                        df4 <- tibble(
+                          id = id, 
+                          alt = alt
+                        )
+                      }
+                      return(list(id = df1, xref = df2, syn = df3, alt = df4))
                     }
 )
 
@@ -89,7 +109,7 @@ nodesJson <- lapply(1:nrow(readJson$graphs$nodes[[1]]),
 id <- do.call(rbind, lapply(nodesJson, function(x) x$id))
 xref <- do.call(rbind, lapply(nodesJson, function(x) x$xref))
 syn <- do.call(rbind, lapply(nodesJson, function(x) x$syn))
-
+alt <- do.call(rbind, lapply(nodesJson, function(x) x$alt))
 
 ###########################################
 ## extract edges (parents: ... "is a " ...) 
@@ -350,7 +370,6 @@ getAncestors <- function(id){
   return(list(parents=unique(parents), level=level))
 }
 
-
 parentList <- unstack(parentId, parent~id)
 termParents <- parentList
 library(BiocParallel)
@@ -371,6 +390,27 @@ entryId <- entryId %>%
                            TRUE ~ level))
 
 #######################################
+# Alternative ID
+altId <- alt[alt$id %in% disease$descendants,] %>%
+  as_tibble()
+table(altId$id %in% entryId$id)
+table(altId$alt %in% entryId$id)
+toAdd <- altId %>%
+  select(id = alt) %>%
+  mutate(DB = "DOID", 
+         def = NA, 
+         level = NA) %>%
+  distinct()
+entryId <- entryId %>%
+  bind_rows(toAdd)
+altId <- altId %>%
+  mutate(DB = gsub(":.*", "", id),
+         id = gsub(".*:", "", id),
+         aDB = gsub(":.*", "", alt),
+         altid = gsub(".*:", "", alt)) %>%
+  select(-alt)
+
+#######################################
 # Remove DB from all ID names from all tables
 crossId$id1 <- gsub(".*:","",crossId$id1)
 crossId$id2 <- gsub(".*:","",crossId$id2)
@@ -385,6 +425,7 @@ DO_idNames <- idNames[,c("DB","id","syn","canonical")]
 DO_parentId <- parentId[,c("DB","id","pDB","parent","origin")]
 DO_crossId <- crossId[,c("DB1","id1","DB2","id2")]
 DO_entryId <- entryId[,c("DB","id","def","level")]
+DO_altId <- altId[,c("DB", "id", "aDB", "altid")]
 
 ############################
 toSave <- grep("^DO[_]", ls(), value=T)
@@ -405,7 +446,6 @@ for(f in toSave){
     qmethod = "double"
   )
 }
-writeLastUpdate()
 
 ##############################################################
 ## Check model
