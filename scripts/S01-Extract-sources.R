@@ -18,14 +18,14 @@ urls <- unlist(lapply(
 ))
 
 ## Clone or pull git repository 
-srcDir <- "../sources/HumanDiseaseOntology" # source directory 
+srcDir <- "../sources/HumanDiseaseOntology" # source directory
 gitRepo <- urls[1] # not useful for updates, only for first pull
-if(!dir.exists(srcDir)){ # first pull
-  gitRepo <- git2r::clone(url = gitRepo, local_path = srcDir)
-}else{ # updates
-  gitRepo <- git2r::repository(srcDir) # opens source directory
-  git2r::pull(gitRepo) # pulls new data --> new data are in source directory as well
-}
+# if(!dir.exists(srcDir)){ # first pull
+#   gitRepo <- git2r::clone(url = gitRepo, local_path = srcDir)
+# }else{ # updates
+#   gitRepo <- git2r::repository(srcDir) # opens source directory
+#   git2r::pull(gitRepo) # pulls new data --> new data are in source directory as well
+# }
 
 # Check if some files in sources>DO>src>ontology have been updated
 

@@ -15,7 +15,7 @@ library(tidyr)
 library(ReDaMoR)
 ##
 mc.cores <- 55
-sdir <- "../sources/HumanDiseaseOntology/src/ontology/"
+sdir <- "../sources/HumanDiseaseOntology-master/src/ontology/"
 ddir <- "../data"
 
 ###############################################################################@
@@ -35,8 +35,9 @@ sfi_name <- unlist(lapply(
 ###############################################################################@
 ## Data model
 ###############################################################################@
-# dm <- model_relational_data(dm)
-# save(dm, file = here("model", "DO.rda"))
+load(here("model", "DO.rda"))
+dm <- model_relational_data(dm)
+save(dm, file = here("model", "DO.rda"))
 
 ###############################################################################@
 ## Data from doid.json ----
@@ -406,9 +407,8 @@ entryId <- entryId %>%
 altId <- altId %>%
   mutate(DB = gsub(":.*", "", id),
          id = gsub(".*:", "", id),
-         aDB = gsub(":.*", "", alt),
-         altid = gsub(".*:", "", alt)) %>%
-  select(-alt)
+         altDB = gsub(":.*", "", alt),
+         alt = gsub(".*:", "", alt)) 
 
 #######################################
 # Remove DB from all ID names from all tables
@@ -425,7 +425,7 @@ DO_idNames <- idNames[,c("DB","id","syn","canonical")]
 DO_parentId <- parentId[,c("DB","id","pDB","parent","origin")]
 DO_crossId <- crossId[,c("DB1","id1","DB2","id2")]
 DO_entryId <- entryId[,c("DB","id","def","level")]
-DO_altId <- altId[,c("DB", "id", "aDB", "altid")]
+DO_altId <- altId[,c("DB", "id", "altDB", "alt")]
 
 ############################
 toSave <- grep("^DO[_]", ls(), value=T)
