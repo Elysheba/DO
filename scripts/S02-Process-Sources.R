@@ -15,7 +15,7 @@ library(tidyr)
 library(ReDaMoR)
 ##
 mc.cores <- 55
-sdir <- "../sources/HumanDiseaseOntology-master/src/ontology/"
+sdir <- "../sources/HumanDiseaseOntology/src/ontology"
 ddir <- "../data"
 
 ###############################################################################@
@@ -36,7 +36,7 @@ sfi_name <- unlist(lapply(
 ## Data model
 ###############################################################################@
 load(here("model", "DO.rda"))
-dm <- model_relational_data(dm)
+# dm <- model_relational_data(dm)
 save(dm, file = here("model", "DO.rda"))
 
 ###############################################################################@
