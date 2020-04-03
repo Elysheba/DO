@@ -4,6 +4,7 @@
 	"description": "The Disease Ontology has been developed as a standardized ontology for human disease with the purpose of providing the biomedical community with consistent, reusable and sustainable descriptions of human disease terms, phenotype characteristics and related medical vocabulary disease concepts.",
 	"reference URL": "http://disease-ontology.org/",
 	"version": "0.3",
+	"maintainer":"Liesbeth François <liesbeth.francois@ucb.com>",
 	"source files": [
 		{
 			"name":"doid.owl",
