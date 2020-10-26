@@ -19,26 +19,26 @@ urls <- unlist(lapply(
 
 ## Clone or pull git repository 
 srcDir <- "../sources/HumanDiseaseOntology" # source directory
-# gitRepo <- urls[1] # not useful for updates, only for first pull
-# if(!dir.exists(srcDir)){ # first pull
-#   gitRepo <- git2r::clone(url = gitRepo, local_path = srcDir)
-# }else{ # updates
-#   gitRepo <- git2r::repository(srcDir) # opens source directory
-#   git2r::pull(gitRepo) # pulls new data --> new data are in source directory as well
-# }
+gitRepo <- urls[1] # not useful for updates, only for first pull
+if(!dir.exists(srcDir)){ # first pull
+  gitRepo <- git2r::clone(url = gitRepo, local_path = srcDir)
+}else{ # updates
+  gitRepo <- git2r::repository(srcDir) # opens source directory
+  git2r::checkout(gitRepo, "master", force = TRUE) # pulls new data --> new data are in source directory as well
+}
 
 # Check if some files in sources>DO>src>ontology have been updated
 
 ###############################################
 ## Extract from new pull the time and date --> saves on a new D0_sourceFiles, with url from json Description file
-# rcurrent <- git2r::odb_blobs(gitRepo)
-# rcurrent <- tail(rcurrent[rcurrent$name == "doid.json",], n = 1L)
-# DO_sourceFiles <- data.frame(url = urls,
-#                              current = rcurrent$when)
-
-lf <- grep("doid.json", list.files(file.path(srcDir, "src", "ontology"), full.names = T), value = T)
+rcurrent <- git2r::odb_blobs(gitRepo)
+rcurrent <- tail(rcurrent[rcurrent$name == "doid.json",], n = 1L)
 DO_sourceFiles <- data.frame(url = urls,
-                             current = file.info(lf)$mtime)
+                             current = rcurrent$when)
+
+# lf <- grep("doid.json", list.files(file.path(srcDir, "src", "ontology"), full.names = T), value = T)
+# DO_sourceFiles <- data.frame(url = urls,
+#                              current = file.info(lf)$mtime)
 
 ###############################################
 ## Saves new D0_sourceFiles.txt (only contains url and time/date of pull) in Data

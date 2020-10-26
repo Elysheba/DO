@@ -1,10 +1,16 @@
 {
+	"$schema":"TKCat_Condition_collection_1.0",
+	"$id":"DO_Condition_1.0",
 	"collection":"Condition",
 	"resource":"DO",
 	"tables":[
 		{
 			"name":"DO_entryId",
 			"fields":{
+				"condition": {
+					"static":true,
+					"value":"Disease"
+				},
 				"source": {
 					"static":false,
 					"value":"DB"
@@ -12,6 +18,23 @@
 				"identifier": {
 					"static":false,
 					"value":"id"
+				}
+			}
+		},
+		{
+			"name":"DO_crossId",
+			"fields":{
+				"condition": {
+					"static":true,
+					"value":"Disease"
+				},
+				"source": {
+					"static":false,
+					"value":"DB2"
+				},
+				"identifier": {
+					"static":false,
+					"value":"id2"
 				}
 			}
 		}
