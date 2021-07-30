@@ -3,12 +3,12 @@
 	"title": "Data extracted from the Disease Ontology database",
 	"description": "The Disease Ontology has been developed as a standardized ontology for human disease with the purpose of providing the biomedical community with consistent, reusable and sustainable descriptions of human disease terms, phenotype characteristics and related medical vocabulary disease concepts.",
 	"reference URL": "http://disease-ontology.org/",
-	"version": "0.3",
+	"version": "0.5",
 	"maintainer":"Liesbeth François <liesbeth.francois@ucb.com>",
 	"source files": [
 		{
-			"name":"doid.owl",
-			"URL template":"https://github.com/DiseaseOntology/HumanDiseaseOntology",
+			"name":"HumanDiseaseOntology-2021-07-29.zip",
+			"URL template":"https://github.com/DiseaseOntology/HumanDiseaseOntology/archive/refs/tags/v2021-07-29.zip",
 			"remote update frequency": {
 				"value": 0,
 				"units": "1/day"

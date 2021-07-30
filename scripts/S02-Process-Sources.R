@@ -1,28 +1,27 @@
 rm(list = ls())
 gc()
 
-setwd("~/Shared/Data-Science/Data-Source-Model-Repository/DO/scripts/")
 
 library(XML)
 library(parallel)
 library(git2r)
 library(RJSONIO)
-source("../../00-Utils/writeLastUpdate.R")
+# source(here("../00-Utils/writeLastUpdate.R"))
 library(here)
 library(dplyr)
 library(tibble)
 library(tidyr)
 library(ReDaMoR)
 ##
-mc.cores <- 55
-sdir <- "../sources/HumanDiseaseOntology/src/ontology"
-ddir <- "../data"
+mc.cores <- 20
+# sdir <- here("sources")
+ddir <- here("data")
 
 ###############################################################################@
 ## Source information - extract source file name (.owl) from description JSON file
 ###############################################################################@
 
-desc <- RJSONIO::readJSONStream("../DESCRIPTION.json")
+desc <- RJSONIO::readJSONStream(here("DESCRIPTION.json"))
 sourceFiles <- desc$"source files"
 sfi_name <- unlist(lapply(
   sourceFiles,
@@ -31,13 +30,28 @@ sfi_name <- unlist(lapply(
     return(toRet)
   }
 ))
+sdir <- here("sources", gsub(".zip", "", sfi_name), "src/ontology")
+
+
+###############################################################################@
+## Data from do ----
+###############################################################################@
+## decompress gz
+# for(f in sfi_name$file){
+  gzf <- file.path(sdir,sfi_name)
+  print(gzf)
+  dest <- gsub("-20.*", "", gzf)
+  system(paste0("unzip ", gzf, " -d ", sdir))
+  # system(paste0("rm ",file.path(sdir,gsub(".gz","",f))))
+# }
+
 
 ###############################################################################@
 ## Data model
 ###############################################################################@
 load(here("model", "DO.rda"))
-# dm <- model_relational_data(dm)
-save(dm, file = here("model", "DO.rda"))
+# dm <- model_relational_data()
+# save(dm, file = here("model", "DO.rda"))
 
 ###############################################################################@
 ## Data from doid.json ----
