@@ -31,7 +31,7 @@ sfi_name <- unlist(lapply(
   }
 ))
 sdir <- here("sources", gsub(".zip", "", sfi_name), "src/ontology")
-
+# sdir <- here("sources")
 
 ###############################################################################@
 ## Data from do ----
@@ -49,7 +49,7 @@ sdir <- here("sources", gsub(".zip", "", sfi_name), "src/ontology")
 ###############################################################################@
 ## Data model
 ###############################################################################@
-load(here("model", "DO.rda"))
+# load(here("model", "DO.rda"))
 # dm <- model_relational_data()
 # save(dm, file = here("model", "DO.rda"))
 

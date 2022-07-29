@@ -8,7 +8,7 @@
 	"source files": [
 		{
 			"name":"HumanDiseaseOntology-2021-07-29.zip",
-			"URL template":"https://github.com/DiseaseOntology/HumanDiseaseOntology/archive/refs/tags/v2021-07-29.zip",
+			"URL template":"https://github.com/DiseaseOntology/HumanDiseaseOntology/releases/tag/v2022-07-27.zip",
 			"remote update frequency": {
 				"value": 0,
 				"units": "1/day"
